@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LEGO Instructions - Step {{ step }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 20px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    th { background-color: #444; color: white; }
+    img { height: 50px; }
+    .nav-links { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .nav-links a { padding: 10px 20px; background-color: #444; color: white; text-decoration: none; border-radius: 5px; }
+    .nav-links span { color: #999; }
+  </style>
+</head>
+<body>
+  <h1>🧱 LEGO Instructions – Step {{ step }}</h1>
+    {% set summary = {} %}
+  {% for brick in bricks %}
+    {% set key = (brick['lego_color'], brick['part_id']) %}
+    {% if key in summary %}
+      {% set _ = summary.__setitem__(key, summary[key] + 1) %}
+    {% else %}
+      {% set _ = summary.__setitem__(key, 1) %}
+    {% endif %}
+  {% endfor %}
+
+  <div style="margin: 20px 0; padding: 10px; background: #ffffff; border-left: 4px solid #444;">
+    <h2>📝 Step Summary</h2>
+    <p>Add {{ bricks|length }} bricks:</p>
+    <ul>
+      {% for (color, part_id), count in summary.items() %}
+        <li>{{ count }}x {{ color }} ({{ part_id }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div style="text-align: center; margin: 20px 0;">
+    <h2>Visual Preview</h2>
+    <img src="{{ url_for('static', filename='instructions_step_' ~ step ~ '.png') }}" alt="Step {{ step }} Preview" style="max-width: 100%; border: 2px solid #ccc;">
+  </div>
+
+  <div class="nav-links">
+    {% if step > 1 %}
+      <a href="{{ url_for('instructions', step=step - 1) }}">⬅ Previous Step</a>
+    {% else %}
+      <span>⬅ Previous Step</span>
+    {% endif %}
+
+    {% if step < total_steps %}
+      <a href="{{ url_for('instructions', step=step + 1) }}">Next Step ➡</a>
+    {% else %}
+      <span>Next Step ➡</span>
+    {% endif %}
+  </div>
+
+  {% if bricks %}
+  <table>
+    <thead>
+      <tr>
+        <th>Brick Type</th>
+        <th>Color</th>
+        <th>Part ID</th>
+        <th>Image</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for brick in bricks %}
+      <tr>
+        <td>{{ brick['brick_type'] }}</td>
+        <td>{{ brick['lego_color'] }}</td>
+        <td>{{ brick['part_id'] }}</td>
+        <td><img src="https://www.bricklink.com/PL/{{ brick['part_id'] }}.jpg" alt="Part {{ brick['part_id'] }}"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No bricks found for this step.</p>
+  {% endif %}
+</body>
+</html>
